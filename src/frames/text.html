@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>text</title>
+    <link rel="stylesheet" href="../index.css">
+    <link href="../assets/fontawesome-free-5.15.2-web/css/all.css" rel="stylesheet">
+    <script src="../assets/fontawesome-free-5.15.2-web/js/all.js"></script>
+    <style>
+        body{
+            background-color: #eeeeee;  
+        }
+        .background{
+            position: fixed;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            /* z-index: -1; */
+            /* background-color: var(--blue); */
+            align-items: center;
+            justify-content: center;
+        }
+        .bgicon{
+           font-size: 35em;
+           color: rgba(128,128,128,0.1);
+        }
+        @media screen and (min-width:0px) and (max-width:800px){
+            .bgicon{
+                font-size: 28em;
+            }
+        }
+        #centralize{
+            position: relative;
+            display: block;
+            top:calc(50% - auto);
+            margin: auto;
+            width: 55%;
+            min-width: 200px;
+            height: auto;
+            /* background-color: var(--amber); */
+        }
+        #canvasbody{
+            display: block;
+            min-width: 170px;
+            min-height: 170px;
+            max-width: 300px;
+            max-height: 300px;
+            width: 40vw;
+            height: 40vw;
+            margin: auto;
+            box-shadow: 0px 8px 15px -8px rgba(0, 0, 0, 0.4);
+            padding: 5px;
+            background-color: #ffffff;
+        }
+        #canvas{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #textinput{
+            display: block;
+            width: 100%;
+            min-width: 200px;
+            max-height: 100px;
+            margin: auto;
+            outline: none;
+            border: none;
+            border-bottom: 2px solid var(--blue);
+            background-color: transparent;
+            resize: none;
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+            overflow-y: scroll;
+            padding: 5px;
+        }
+        #textinput::-webkit-scrollbar {
+            display: none;
+        }
+        #textinput:focus {
+            border-bottom: 2px solid blue;
+        }
+        #textinput[contenteditable]:empty::before {
+            content: "Enter text";
+            color: gray;
+            cursor: text;
+        }
+    </style>
+</head>
+<body id="body">
+    <div class="background">
+        <p class="fa fa-file bgicon"></p>
+    </div>
+    <div id="centralize">
+        <div id="canvasbody">
+            <div id="canvas">
+            </div>
+        </div>
+        <div style="width:100%;height: 50px;">
+        </div>
+        <span  autofocus role="textbox" contenteditable="true" id="textinput" placeholder="text here!"></span>
+        <button class="material-button indigoAccent" style="float: right;margin: 5px;" onclick="save()">
+            <p class="fa fa-save"></p>
+            save
+        </button>
+    </div>
+    <script src="../assets/js/QRCODEJS/qrcode.min.js"></script>
+    <script src="../assets/js/QRCODEJS/qrcode.js"></script>
+    <script src="../assets/js/html2canvas/html2canvas.min.js"></script>
+    <script src="../assets/js/html2canvas/html2canvas.js"></script>
+    <script>
+        var body = document.getElementById('body');
+        var canvas = document.getElementById('canvas');
+        var centralize = document.getElementById('centralize');
+        var textinput = document.getElementById('textinput');
+        centralize.style.top = 'calc(50% - '+(centralize.offsetHeight / 2).toString()+'px)';
+       
+        var qrcode = new QRCode(canvas,{
+            width:canvas.offsetWidth,
+            height:canvas.offsetHeight,
+            colorDark : "#000000",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+        });
+
+        function makeCode(){
+            let data = textinput;
+            data = (data.innerText.length<=0)?' QRCodeGen' : data.innerText;
+            qrcode.makeCode(data);
+            centralize.style.top = 'calc(50% - '+(centralize.offsetHeight / 2).toString()+'px)';
+        }
+        function onResize(){
+            canvas.innerHTML = '';
+            qrcode = new QRCode(canvas,{
+                width:canvas.offsetWidth,
+                height:canvas.offsetHeight,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
+            makeCode();
+        }
+        function save(){
+            if(textinput.innerText.length<=0){
+                alert('Please input some data in textbox below.');
+               return null; 
+            }
+            html2canvas(document.querySelector("#canvasbody")).then(canvas => {
+                const url = canvas.toDataURL('image/jpg', 0.8);
+                const base64Data = url.replace(/^data:image\/png;base64,/, "");
+                window.parent.save(base64Data);
+            });
+        }
+        makeCode();
+        textinput.addEventListener('keyup',makeCode);
+        textinput.addEventListener('keydown',makeCode);
+        window.addEventListener('resize',onResize);
+    </script>
+</body>
+</html>

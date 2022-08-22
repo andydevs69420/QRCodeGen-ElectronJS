@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>QRCodeGen</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="assets/fontawesome-free-5.15.2-web/css/all.css" rel="stylesheet">
+    <script src="assets/fontawesome-free-5.15.2-web/js/all.js"></script>
+  </head>
+  <body>
+    <div id="appBar">
+        <h3 class="unselectable" id="appBarTitle">QRCodeGen</h3>
+    </div>
+    <div id="sidePanel">
+      <div id="sidePanelMain">
+          <p class="sidePanelLabel unselectable">Scan</p>
+          <button class="material-button w-100 white text-dark unselectable" style="margin-left:1%;">
+              <p class="fa fa-qrcode"></p>
+              Scan QR
+          </button>
+          <p class="sidePanelLabel unselectable">Generate</p>
+          <div id="modeList">
+            <div class="tile inactive" id="dbtn1" onclick="setActive(this,0)">
+                <p class="unselectable">
+                  <p class="fa fa-file" style="margin-right: 5px;"></p>
+                  <p class="unselectable text-dark">Text</p>
+                </p>
+            </div>
+            <div class="tile inactive" id="dbtn2" onclick="setActive(this,1)">
+                <p class="unselectable">
+                  <p class="fa fa-wifi" style="margin-right: 5px;"></p>
+                  <p class="unselectable text-dark">Wifi</p>
+                </p>
+            </div>
+            <div class="tile inactive" id="dbtn3" onclick="setActive(this,2)">
+                <p class="unselectable">
+                  <p class="fa fa-sms" style="margin-right: 5px;"></p>
+                  <p class="unselectable text-dark">Sms</p>
+                </p>
+            </div>
+          </div>
+      </div>
+    </div>
+    <!-- window -->
+    <iframe id="frame" src="frames/text.html" frameborder="0"></iframe>
+
+    
+
+    <script src="renderer.js"></script>
+    <script>
+    
+      var fs = require('fs');
+      let iframe = document.getElementById('frame');
+
+      let draggable = document.getElementById('sidePanel');
+      let isDraggable = false;
+      let isResizing = false;
+      let width = draggable.clientWidth;
+
+      let buttons = [document.getElementById('dbtn1'),document.getElementById('dbtn2'),document.getElementById('dbtn3')];
+      let actions = ['frames/text.html','frames/wifi.html','frames/sms.html'];
+      let count = 0;
+      let pactive = null;
+      let pid = null;
+      let active = null;
+      let id = null;
+
+
+      function dragAndResize(x,y){
+        isResizing = true;
+      }
+      function parentDrag(x,y){
+        iframe.style.pointerEvents = 'none';
+        draggable.style.cursor = 'grabbing';
+        draggable.parentNode.style.cursor = 'grabbing';
+        draggable.style.width = x.offsetX+'px';
+        if(x.offsetX == draggable.offsetWidth){
+          iframe.style.paddingLeft = x.offsetX+'px';
+        }else{
+          iframe.style.paddingLeft = draggable.offsetWidth+'px';
+        }
+        
+      }
+      function parentDrop(){
+        iframe.style.pointerEvents = 'initial';
+        draggable.style.cursor = 'grab';
+        draggable.parentNode.style.cursor = 'initial';
+        draggable.parentNode.removeEventListener('mousemove',parentDrag);
+        draggable.parentNode.removeEventListener('mouseup',parentDrop);
+      }
+      function onMouseDown(){
+        isDraggable = true
+        iframe.style.pointerEvents = 'none';
+        draggable.parentNode.addEventListener('mousemove',parentDrag);
+        draggable.parentNode.addEventListener('mouseup',parentDrop);
+      }
+      function onMouseUp(){
+        if(isDraggable){
+          iframe.style.pointerEvents = 'initial';
+          isDraggable = false;
+          isResizing = false
+          draggable.style.cursor = 'grab';
+          draggable.parentNode.style.cursor = 'initial';
+          draggable.parentNode.removeEventListener('mousemove',parentDrag);
+          draggable.parentNode.removeEventListener('mouseup',parentDrop);
+        }
+      }
+      
+      draggable.addEventListener('mousedown',onMouseDown);
+      draggable.addEventListener('mouseup',onMouseUp);
+
+      function setActive(a,_id) {
+        if(_id!=id) {
+            pactive = active;
+            active = a;
+            active.classList.add('active');
+            if(pactive!=null) {
+              pactive.classList.remove('active');
+              pactive = null;
+            }
+            iframe.src = actions[_id];
+            pid = id;
+            id = _id;
+        }
+      }
+      
+      
+      setActive(document.getElementById('dbtn1'),0);
+    </script>
+  </body>
+</html>
